@@ -9,8 +9,8 @@ const (
 )
 
 type Task struct {
-	ID     string     `gorm: "primaryKey" json:"id"`
-	Title  string     `json:title"`
+	ID     string     `gorm:"primaryKey" json:"id"`
+	Title  string     `json:"title"`
 	Status TaskStatus `json:"status"`
 }
 

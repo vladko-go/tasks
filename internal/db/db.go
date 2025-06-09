@@ -2,7 +2,6 @@ package db
 
 import (
 	"log"
-	"pet-project/internal/taskService"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -16,10 +15,6 @@ func InitDB() (*gorm.DB, error) {
 	db, err = gorm.Open(postgres.Open(dns), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Could not connect to db: %v", err)
-	}
-
-	if err = db.AutoMigrate(&taskService.Task{}); err != nil {
-		log.Fatalf("Could not migrate: %v", err)
 	}
 
 	return db, nil
