@@ -1,36 +1,37 @@
 package main
 
 import (
-	"pet-project/internal/db"
+	"log"
+	"pet-project/internal/database"
 	"pet-project/internal/handlers"
-	"pet-project/internal/taskService"
+	"pet-project/internal/tasksService"
+	"pet-project/internal/web/tasks"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
-	db, err := db.InitDB()
-	if err != nil {
-		panic(err)
-	}
+	database.InitDB()
+	database.DB.AutoMigrate(&tasksService.Task{})
 
+	repo := tasksService.NewTaskRepository(database.DB)
+	service := tasksService.NewService(repo)
+
+	handler := handlers.NewHandler(service)
+
+	// Инициализируем echo
 	e := echo.New()
 
-	taskRepository := taskService.NewTaskRepository(db)
-
-	taskService := taskService.NewTaskService(taskRepository)
-
-	handler := handlers.NewTaskHandler(taskService)
-
-	e.Use(middleware.CORS())
+	// используем Logger и Recover
 	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
 
-	e.GET("/tasks", handler.GetTasks)
-	e.POST("/tasks", handler.CreateTask)
-	e.DELETE("/tasks/:id", handler.DeleteTask)
-	e.PATCH("/tasks/:id", handler.EditTask)
+	// Прикол для работы в echo. Передаем и регистрируем хендлер в echo
+	strictHandler := tasks.NewStrictHandler(handler, nil) // тут будет ошибка
+	tasks.RegisterHandlers(e, strictHandler)
 
-	e.Start("localhost:8080")
-
+	if err := e.Start(":8080"); err != nil {
+		log.Fatalf("failed to start with err: %v", err)
+	}
 }
