@@ -1,4 +1,4 @@
-package db
+package database
 
 import (
 	"log"
@@ -7,15 +7,15 @@ import (
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
+var DB *gorm.DB
 
 func InitDB() (*gorm.DB, error) {
 	dns := "host=localhost user=postgres password=postgres dbname=postgres port=5432 sslmode=disable"
 	var err error
-	db, err = gorm.Open(postgres.Open(dns), &gorm.Config{})
+	DB, err = gorm.Open(postgres.Open(dns), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Could not connect to db: %v", err)
 	}
 
-	return db, nil
+	return DB, nil
 }
