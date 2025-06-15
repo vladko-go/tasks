@@ -12,8 +12,14 @@ import (
 )
 
 func main() {
-	database.InitDB()
-	database.DB.AutoMigrate(&tasksService.Task{})
+	_, err := database.InitDB()
+	if err != nil {
+		log.Fatalf("Could not connect to db: %v", err)
+	}
+	err = database.DB.AutoMigrate(&tasksService.Task{})
+	if err != nil {
+		log.Fatalf("Could not connect to db: %v", err)
+	}
 
 	repo := tasksService.NewTaskRepository(database.DB)
 	service := tasksService.NewService(repo)
