@@ -5,7 +5,9 @@ import (
 	"pet-project/internal/database"
 	"pet-project/internal/handlers"
 	"pet-project/internal/tasksService"
+	"pet-project/internal/usersService"
 	"pet-project/internal/web/tasks"
+	"pet-project/internal/web/users"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -21,10 +23,15 @@ func main() {
 		log.Fatalf("Could not connect to db: %v", err)
 	}
 
-	repo := tasksService.NewTaskRepository(database.DB)
-	service := tasksService.NewService(repo)
+	taskRepo := tasksService.NewTaskRepository(database.DB)
+	taskService := tasksService.NewService(taskRepo)
 
-	handler := handlers.NewHandler(service)
+	taskHandler := handlers.NewTaskHandler(taskService)
+
+	userRepo := usersService.NewUserRepository(database.DB)
+	userService := usersService.NewService(userRepo)
+
+	userHandler := handlers.NewUserHandler(userService)
 
 	// Инициализируем echo
 	e := echo.New()
@@ -34,8 +41,11 @@ func main() {
 	e.Use(middleware.Recover())
 
 	// Прикол для работы в echo. Передаем и регистрируем хендлер в echo
-	strictHandler := tasks.NewStrictHandler(handler, nil) // тут будет ошибка
-	tasks.RegisterHandlers(e, strictHandler)
+	strictTasksHandler := tasks.NewStrictHandler(taskHandler, nil) // тут будет ошибка
+	tasks.RegisterHandlers(e, strictTasksHandler)
+
+	strictUsersHandler := users.NewStrictHandler(userHandler, nil) // тут будет ошибка
+	users.RegisterHandlers(e, strictUsersHandler)
 
 	if err := e.Start(":8080"); err != nil {
 		log.Fatalf("failed to start with err: %v", err)
