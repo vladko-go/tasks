@@ -1,36 +1,53 @@
 package main
 
 import (
-	"pet-project/internal/db"
+	"log"
+	"pet-project/internal/database"
 	"pet-project/internal/handlers"
-	"pet-project/internal/taskService"
+	"pet-project/internal/tasksService"
+	"pet-project/internal/usersService"
+	"pet-project/internal/web/tasks"
+	"pet-project/internal/web/users"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
-	db, err := db.InitDB()
+	_, err := database.InitDB()
 	if err != nil {
-		panic(err)
+		log.Fatalf("Could not connect to db: %v", err)
+	}
+	err = database.DB.AutoMigrate(&tasksService.Task{})
+	if err != nil {
+		log.Fatalf("Could not connect to db: %v", err)
 	}
 
+	taskRepo := tasksService.NewTaskRepository(database.DB)
+	taskService := tasksService.NewService(taskRepo)
+
+	taskHandler := handlers.NewTaskHandler(taskService)
+
+	userRepo := usersService.NewUserRepository(database.DB)
+	userService := usersService.NewService(userRepo)
+
+	userHandler := handlers.NewUserHandler(userService)
+
+	// Инициализируем echo
 	e := echo.New()
 
-	taskRepository := taskService.NewTaskRepository(db)
-
-	taskService := taskService.NewTaskService(taskRepository)
-
-	handler := handlers.NewTaskHandler(taskService)
-
-	e.Use(middleware.CORS())
+	// используем Logger и Recover
 	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
 
-	e.GET("/tasks", handler.GetTasks)
-	e.POST("/tasks", handler.CreateTask)
-	e.DELETE("/tasks/:id", handler.DeleteTask)
-	e.PATCH("/tasks/:id", handler.EditTask)
+	// Прикол для работы в echo. Передаем и регистрируем хендлер в echo
+	strictTasksHandler := tasks.NewStrictHandler(taskHandler, nil) // тут будет ошибка
+	tasks.RegisterHandlers(e, strictTasksHandler)
 
-	e.Start("localhost:8080")
+	strictUsersHandler := users.NewStrictHandler(userHandler, nil) // тут будет ошибка
+	users.RegisterHandlers(e, strictUsersHandler)
 
+	if err := e.Start(":8080"); err != nil {
+		log.Fatalf("failed to start with err: %v", err)
+	}
 }
