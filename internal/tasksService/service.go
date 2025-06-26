@@ -27,6 +27,7 @@ func (t *taskService) Create(payload Task) (Task, error) {
 		ID:     uint(uuid.New().NodeID()[2]),
 		Task:   payload.Task,
 		IsDone: payload.IsDone,
+		UserId: payload.UserId,
 	}
 
 	if err := t.repo.Create(task); err != nil {

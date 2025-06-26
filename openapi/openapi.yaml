@@ -189,6 +189,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+  /users/{id}/tasks:
+    get:
+      summary: Get all tasks for a user
+      tags:
+        - users
+      parameters:
+        - name: id
+          in: path
+          description: ID of the user to retrieve tasks for
+          required: true
+          schema:
+            type: integer
+            format: uint
+      responses:
+        '200':
+          description: A list of tasks for the user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
 components:
   schemas:
     Task:
@@ -201,6 +223,8 @@ components:
           type: string
         is_done:
           type: boolean
+        user_id:
+          type: integer
 
     User:
       type: object
@@ -222,3 +246,7 @@ components:
         deleted_at:
           type: string
           format: date-time
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Task'

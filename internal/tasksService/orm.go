@@ -12,6 +12,7 @@ type Task struct {
 	ID     uint   `gorm:"primaryKey" json:"id"`
 	Task   string `json:"task"`
 	IsDone bool   `json:"is_done"`
+	UserId uint   `gorm:"foreignKey" json:"user_id"`
 }
 
 type TaskCreateRequest struct {

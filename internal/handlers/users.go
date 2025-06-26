@@ -54,14 +54,37 @@ func (h *UserHandler) GetUsers(_ context.Context, _ users.GetUsersRequestObject)
 
 	response := users.GetUsers200JSONResponse{}
 
-	for _, tsk := range allUsers {
+	for _, usr := range allUsers {
 		user := users.User{
-			Id:    &tsk.ID,
-			Email: &tsk.Email,
+			Id:    &usr.ID,
+			Email: &usr.Email,
 		}
 		response = append(response, user)
 	}
 
+	return response, nil
+}
+
+func (h *UserHandler) GetUsersIdTasks(_ context.Context, request users.GetUsersIdTasksRequestObject) (users.GetUsersIdTasksResponseObject, error) {
+	// Распаковываем тело запроса напрямую, без декодера!
+	id := request.Id
+	// Обращаемся к сервису и получаем задачу
+	tasks, err := h.Service.GetTasksByUserId(id)
+	if err != nil {
+		return nil, err
+	}
+	// создаем структуру респонс
+	response := users.GetUsersIdTasks200JSONResponse{}
+
+	for _, task := range tasks {
+		t := users.Task{
+			Id:     &task.ID,
+			Task:   &task.Task,
+			IsDone: &task.IsDone,
+		}
+		response = append(response, t)
+	}
+	// Просто возвращаем респонс!
 	return response, nil
 }
 

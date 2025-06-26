@@ -68,6 +68,7 @@ func (h *TaskHandler) PostTasks(_ context.Context, request tasks.PostTasksReques
 	taskToCreate := tasksService.Task{
 		Task:   *taskRequest.Task,
 		IsDone: *taskRequest.IsDone,
+		UserId: *taskRequest.UserId,
 	}
 	createdTask, err := h.Service.Create(taskToCreate)
 

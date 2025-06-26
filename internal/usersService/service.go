@@ -1,6 +1,7 @@
 package usersService
 
 import (
+	taskService "pet-project/internal/tasksService"
 	"time"
 
 	"github.com/google/uuid"
@@ -12,6 +13,7 @@ type UserService interface {
 	Create(UserCreateRequest) (User, error)
 	Update(id uint, req UserUpdateRequest) (User, error) // Update(id string, title string, status string) error
 	Delete(id uint) error
+	GetTasksByUserId(id uint) ([]taskService.Task, error)
 }
 
 type userService struct {
@@ -30,6 +32,7 @@ func (s *userService) Create(payload UserCreateRequest) (User, error) {
 		Email:     payload.Email,
 		Password:  payload.Password,
 		CreatedAt: time.Now(),
+		Tasks:     []taskService.Task{},
 	}
 
 	if err := s.repo.Create(user); err != nil {
@@ -80,4 +83,8 @@ func (s *userService) Update(id uint, req UserUpdateRequest) (User, error) {
 	}
 
 	return user, nil
+}
+
+func (s *userService) GetTasksByUserId(id uint) ([]taskService.Task, error) {
+	return s.repo.GetTasksByUserId(id)
 }

@@ -19,7 +19,6 @@ type Task struct {
 	Id     *uint   `json:"id,omitempty"`
 	IsDone *bool   `json:"is_done,omitempty"`
 	Task   *string `json:"task,omitempty"`
-	UserId *uint   `json:"user_id,omitempty"`
 }
 
 // PostTasksJSONRequestBody defines body for PostTasks for application/json ContentType.
@@ -370,6 +369,16 @@ func (sh *strictHandler) GetTasksId(ctx echo.Context, id uint) error {
 	}
 	return nil
 }
+
+type DeleteTasksRequestObject struct {
+	Id uint `path:"id"`
+}
+
+type DeleteTasksResponseObject interface {
+	VisitDeleteTasksIdResponse(http.ResponseWriter) error
+}
+
+
 
 // PatchTasksId operation middleware
 func (sh *strictHandler) PatchTasksId(ctx echo.Context, id uint) error {
